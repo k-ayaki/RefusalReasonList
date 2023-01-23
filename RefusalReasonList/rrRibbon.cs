@@ -1,4 +1,5 @@
-﻿using Microsoft.Office.Tools.Ribbon;
+﻿using JpoApi;
+using Microsoft.Office.Tools.Ribbon;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,6 +18,19 @@ namespace RefusalReasonList
 
         private void button1_Click(object sender, RibbonControlEventArgs e)
         {
+            using (Account ac = new Account())
+            {
+                using (AccessToken at = new AccessToken(ac.m_id, ac.m_password, ac.m_path))
+                {
+                    if (at.m_access_token.access_token.Length == 0)
+                    {
+                        MessageBox.Show("アカウントが正しく設定されていません。");
+                        return;
+                    }
+                    at.Dispose();
+                }
+                ac.Dispose();
+            }
             using (RefusalReasonList fileList = new RefusalReasonList())
             {
                 if (fileList.出願番号列の判定("出願番号") == true)
@@ -36,6 +50,20 @@ namespace RefusalReasonList
 
         private void buttonRR2Word_Click(object sender, RibbonControlEventArgs e)
         {
+            using (Account ac = new Account())
+            {
+                using (AccessToken at = new AccessToken(ac.m_id, ac.m_password, ac.m_path))
+                {
+                    if (at.m_access_token.access_token.Length == 0)
+                    {
+                        MessageBox.Show("アカウントが正しく設定されていません。");
+                        return;
+                    }
+                    at.Dispose();
+                }
+                ac.Dispose();
+            }
+
             using (RefusalReasonList rrList = new RefusalReasonList())
             {
                 if (rrList.出願番号列の判定("出願番号") == true)

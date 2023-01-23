@@ -212,6 +212,7 @@ namespace RefusalReasonList
                 Match w_match0 = rx0.Match(fileNumber);
                 if (w_match0.Success)
                 {
+                    at.refresh();
                     AppDocContRefusalReason tj5 = new AppDocContRefusalReason(fileNumber, at.m_access_token.access_token);
                     if (tj5.m_error == tj5.e_CONTENT)
                     {

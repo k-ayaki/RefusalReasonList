@@ -136,12 +136,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_1A6228318E2629E509922E3690C408D4"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_CB196E920B9045BDBA2B6A220CB5ED51"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -203,6 +197,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_9F869135058B6517C60360711887DC51"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_1A6228318E2629E509922E3690C408D4"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -807,15 +807,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:RefusalReasonList"
-        "ProductCode" = "8:{EE720C3F-0E79-4563-88C9-D4B1C3445255}"
-        "PackageCode" = "8:{6C39B1F4-CE01-45E2-AB86-B754E2DE9F99}"
+        "ProductCode" = "8:{1ED8210A-1A9E-4E16-9C32-B1E64C68B5F9}"
+        "PackageCode" = "8:{43E3079C-A2BD-4F4F-A8DA-7C92F9008252}"
         "UpgradeCode" = "8:{37EA6869-B0B0-4FC2-9CE2-CDCE9541E61A}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.0"
+        "ProductVersion" = "8:1.0.1"
         "Manufacturer" = "8:ayaki"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
