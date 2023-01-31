@@ -13,6 +13,7 @@ using System.Xml.Linq;
 using JpoApi;
 using System.IO;
 using System.Text.RegularExpressions;
+using Microsoft.VisualBasic;
 
 namespace RefusalReasonList
 {
@@ -31,7 +32,7 @@ namespace RefusalReasonList
         public bool m_wordConvert { get; set; }
 
         private Excel.Worksheet m_activeSheet;
-        private Excel.Workbook m_workbook;
+        public  Excel.Workbook m_workbook;
         private string m_outPath;
         private string m_relativePath;
 
@@ -222,6 +223,14 @@ namespace RefusalReasonList
                             m_activeSheet.Cells[row, m_out_column].Formula = @"#N/A";
                         }
                         else
+                        if (tj5.m_result.statusCode == "203")
+                        {
+                            m_activeSheet.Cells[row, m_out_column].value = @"";
+                            m_activeSheet.Cells[row, m_out_column].Formula = @"#REF!";
+                            e.Result = 3;
+                            break;
+                        }
+                        else
                         {
                             m_activeSheet.Cells[row, m_out_column].value = @"";
                             m_activeSheet.Cells[row, m_out_column].Formula = @"#REF!";
@@ -240,7 +249,7 @@ namespace RefusalReasonList
                                 {
                                     Directory.CreateDirectory(m_outPath);
                                 }
-                                Xml2Word xml2Word = new Xml2Word(f, fileNumber, m_outPath);
+                                Xml2Word xml2Word = new Xml2Word(f, fileNumber, m_outPath, 20, 15, 30, 25);
                                 if (npe != null)
                                 {
                                     if (xml2Word.m_wordFilePath.Length != 0)
@@ -259,7 +268,7 @@ namespace RefusalReasonList
                                     } else
                                     {
                                         m_activeSheet.Cells[row, m_out_column + j].Formula = "";
-                                        m_activeSheet.Hyperlinks.Add(m_activeSheet.Cells[row, m_out_column + j], "", Type.Missing, "", npe.provisions());
+                                        m_activeSheet.Cells[row, m_out_column + j].value = npe.provisions();
                                         j++;
                                     }
                                 }
@@ -309,7 +318,7 @@ namespace RefusalReasonList
                 else
                 {
                     m_activeSheet.Cells[row, m_out_column].value = @"";
-                    m_activeSheet.Cells[row, m_out_column].Formula = @"#REF!";
+                    m_activeSheet.Cells[row, m_out_column].Formula = @"#NAME?";
                 }
             }
             for(i=0; i<m_oaCount; i++)
@@ -331,15 +340,28 @@ namespace RefusalReasonList
                 {
                     fileNumber = ((int)objFileNumber).ToString();
                 }
+                else if (objFileNumber.GetType() == typeof(double))
+                {
+                    fileNumber = ((double)objFileNumber).ToString();
+                }
+                else if (objFileNumber.GetType() == typeof(float))
+                {
+                    fileNumber = ((float)objFileNumber).ToString();
+                }
                 else if (objFileNumber.GetType() == typeof(string))
                 {
                     fileNumber = ((string)objFileNumber);
+                } else
+                {
+                    fileNumber = ((int)objFileNumber).ToString();
                 }
+                fileNumber = Strings.StrConv(fileNumber, VbStrConv.Narrow, 0x411);
                 Regex rx1 = new Regex(@"^特願(?<year>[0-9]{4,4})-(?<no>[0-9]+)$", RegexOptions.None);
                 Match w_match1 = rx1.Match(fileNumber);
                 if (w_match1.Success)
                 {
                     fileNumber = w_match1.Groups["year"].Value + (w_match1.Groups["no"].Value).PadLeft(6, '0');
+                    return fileNumber;
                 }
                 Regex rx3 = new Regex(@"^特願平(?<year>[0-9]+)-(?<no>[0-9]+)$", RegexOptions.None);
                 Match w_match3 = rx3.Match(fileNumber);
@@ -347,12 +369,19 @@ namespace RefusalReasonList
                 {
                     int gengo = int.Parse(w_match3.Groups["year"].Value) + 1988;
                     fileNumber = gengo.ToString() + (w_match3.Groups["no"].Value).PadLeft(6, '0');
+                    return fileNumber;
                 }
                 Regex rx2 = new Regex(@"^(?<year>[0-9]{4,4})-(?<no>[0-9]+)$", RegexOptions.None);
                 Match w_match2 = rx2.Match(fileNumber);
                 if (w_match2.Success)
                 {
                     fileNumber = w_match2.Groups["year"].Value + (w_match2.Groups["no"].Value).PadLeft(6, '0');
+                    return fileNumber;
+                }
+                Regex rx4 = new Regex(@"^[0-9]{10,10}$", RegexOptions.None);
+                Match w_match4 = rx4.Match(fileNumber);
+                {
+                    return fileNumber;
                 }
             }
             return fileNumber;

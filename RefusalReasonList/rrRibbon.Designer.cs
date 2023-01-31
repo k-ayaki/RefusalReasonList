@@ -39,6 +39,7 @@
             this.rrButton = this.Factory.CreateRibbonButton();
             this.buttonRR2Word = this.Factory.CreateRibbonButton();
             this.buttonAccount = this.Factory.CreateRibbonButton();
+            this.buttonVersion = this.Factory.CreateRibbonButton();
             this.JpoApi0.SuspendLayout();
             this.rrGroup.SuspendLayout();
             this.SuspendLayout();
@@ -55,6 +56,7 @@
             this.rrGroup.Items.Add(this.rrButton);
             this.rrGroup.Items.Add(this.buttonRR2Word);
             this.rrGroup.Items.Add(this.buttonAccount);
+            this.rrGroup.Items.Add(this.buttonVersion);
             this.rrGroup.Label = "拒絶理由通知";
             this.rrGroup.Name = "rrGroup";
             // 
@@ -78,12 +80,19 @@
             // 
             // buttonAccount
             // 
-            this.buttonAccount.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
             this.buttonAccount.Label = "アカウント";
             this.buttonAccount.Name = "buttonAccount";
             this.buttonAccount.OfficeImageId = "AccountSettings";
             this.buttonAccount.ShowImage = true;
             this.buttonAccount.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.buttonAccount_Click);
+            // 
+            // buttonVersion
+            // 
+            this.buttonVersion.Label = "バージョン";
+            this.buttonVersion.Name = "buttonVersion";
+            this.buttonVersion.OfficeImageId = "VersionComment";
+            this.buttonVersion.ShowImage = true;
+            this.buttonVersion.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.buttonVersion_Click);
             // 
             // rrRibbon
             // 
@@ -106,6 +115,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton rrButton;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton buttonRR2Word;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton buttonAccount;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton buttonVersion;
     }
 
     partial class ThisRibbonCollection

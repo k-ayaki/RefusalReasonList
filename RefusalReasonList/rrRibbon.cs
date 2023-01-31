@@ -66,17 +66,23 @@ namespace RefusalReasonList
 
             using (RefusalReasonList rrList = new RefusalReasonList())
             {
-                if (rrList.出願番号列の判定("出願番号") == true)
+                if (rrList.m_workbook.Path.Length > 0)
                 {
-                    rrList.書込み列の取得(@"@条文");
-                    rrList.行数の取得();
-                    rrList.m_wordConvert = true;
-                    rrList.DoGetRefusalReason();
-                    MessageBox.Show("出願番号列あり");
-                }
-                else
+                    if (rrList.出願番号列の判定("出願番号") == true)
+                    {
+                        rrList.書込み列の取得(@"@条文");
+                        rrList.行数の取得();
+                        rrList.m_wordConvert = true;
+                        rrList.DoGetRefusalReason();
+                        MessageBox.Show("出願番号列あり");
+                    }
+                    else
+                    {
+                        MessageBox.Show("出願番号列なし");
+                    }
+                } else
                 {
-                    MessageBox.Show("出願番号列なし");
+                    MessageBox.Show("ワークシートを保存してください。保存先に拒絶理由通知のWordファイルが生成されます。");
                 }
             }
         }
@@ -84,6 +90,13 @@ namespace RefusalReasonList
         private void buttonAccount_Click(object sender, RibbonControlEventArgs e)
         {
             Globals.ThisAddIn.TaskPane.Visible = !Globals.ThisAddIn.TaskPane.Visible;
+        }
+
+        private void buttonVersion_Click(object sender, RibbonControlEventArgs e)
+        {
+            VersionForm f = new VersionForm();
+            f.StartPosition = FormStartPosition.CenterScreen;
+            f.Show();
         }
     }
 }

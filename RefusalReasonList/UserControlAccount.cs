@@ -23,6 +23,10 @@ namespace RefusalReasonList
                 this.textBoxPassword.Text = ac.m_password;
                 this.textBoxPath.Text = ac.m_path;
                 this.textBoxCacheEffective.Text = ac.m_cacheEffective.ToString();
+                if(this.textBoxCacheEffective.Text.Length == 0)
+                {
+                    this.textBoxCacheEffective.Text = "0";
+                }
             }
         }
 
@@ -33,6 +37,10 @@ namespace RefusalReasonList
                 ac.m_id = this.textBoxID.Text;
                 ac.m_password = this.textBoxPassword.Text;
                 ac.m_path = this.textBoxPath.Text;
+                if (this.textBoxCacheEffective.Text.Length == 0)
+                {
+                    this.textBoxCacheEffective.Text = "0";
+                }
                 ac.m_cacheEffective = Int32.Parse(this.textBoxCacheEffective.Text);
             }
         }
@@ -42,7 +50,7 @@ namespace RefusalReasonList
             AccessToken ac = new AccessToken(this.textBoxID.Text, this.textBoxPassword.Text, this.textBoxPath.Text);
             if (ac.m_access_token.access_token.Length > 0)
             {
-                MessageBox.Show(ac.m_access_token.access_token, "トークン取得");
+                MessageBox.Show("トークン取得に成功しました\r\n" + ac.m_access_token.access_token, "トークン取得");
             } else
             {
                 MessageBox.Show("トークンが取得できませんでした。", "トークン取得");
