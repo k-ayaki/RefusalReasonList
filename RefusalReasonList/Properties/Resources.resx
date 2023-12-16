@@ -124,12 +124,12 @@
     <value>Last Modified 2023/1/28</value>
   </data>
   <data name="Name" xml:space="preserve">
-    <value>拒絶理由通知条文</value>
+    <value>API包袋</value>
   </data>
   <data name="Text" xml:space="preserve">
     <value>バージョン</value>
   </data>
   <data name="Version" xml:space="preserve">
-    <value>ver.1.0.2</value>
+    <value>ver.1.0.3</value>
   </data>
 </root>

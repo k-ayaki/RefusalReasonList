@@ -79,7 +79,7 @@ namespace RefusalReasonList.Properties {
         }
         
         /// <summary>
-        ///   拒絶理由通知条文 に類似しているローカライズされた文字列を検索します。
+        ///   API包袋 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Name {
             get {
@@ -97,7 +97,7 @@ namespace RefusalReasonList.Properties {
         }
         
         /// <summary>
-        ///   ver.1.0.2 に類似しているローカライズされた文字列を検索します。
+        ///   ver.1.0.3 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Version {
             get {

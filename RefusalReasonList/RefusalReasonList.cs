@@ -19,6 +19,8 @@ namespace RefusalReasonList
 {
     class RefusalReasonList : IDisposable
     {
+        private bool disposedValue;
+
         public const int ErrDiv0 = -2146826281; // #DIV0!
         public const int ErrNA = -2146826246;   // #N/A
         public const int ErrName = -2146826259; // #NAME
@@ -27,42 +29,39 @@ namespace RefusalReasonList
         public const int ErrRef = -2146826265;  // #REF!
         public const int ErrValue = -2146826273;    // #VALUE!
 
-        private bool disposedValue;
-
-        public bool m_wordConvert { get; set; }
-
-        private Excel.Worksheet m_activeSheet;
-        public  Excel.Workbook m_workbook;
-        private string m_outPath;
-        private string m_relativePath;
-
-        private int m_in_column;
-        private int m_max_row;
-        private int m_oaCount;
-
-        private int m_out_column;
+        private Excel.Worksheet m_activeSheet { get; set; }
+        public  Excel.Workbook m_workbook { get; set; }
+        private string m_outPath { get; set; }
+        private string m_relativePath { get; set; }
+        private int m_in_column { get; set; }
+        private int m_max_row { get; set; }
+        private int m_oaCount { get; set; }
+        private int m_out_column { get; set; }
         private string m_appendColumn { get; set; }
+
+        private List<Xml2Word> m_xml2WordList = new List<Xml2Word>();
+        private bool m_isProvisions { get; set; }
         public RefusalReasonList()
         {
-            m_activeSheet = Globals.ThisAddIn.Application.ActiveSheet
+            this.m_activeSheet = Globals.ThisAddIn.Application.ActiveSheet
               as Excel.Worksheet;
-            m_workbook = Globals.ThisAddIn.Application.ActiveWorkbook as Excel.Workbook;
-            m_outPath = m_workbook.Path + @"\" + Path.GetFileNameWithoutExtension(m_workbook.Name);
-            m_relativePath = @".\" + Path.GetFileNameWithoutExtension(m_workbook.Name);
-            m_in_column = 0;
-            m_out_column = 0;
-            m_max_row = 0;
-            m_oaCount = 0;
-            m_wordConvert = false;
-            m_appendColumn = @"@条文";
+            this.m_workbook = Globals.ThisAddIn.Application.ActiveWorkbook as Excel.Workbook;
+            this.m_outPath = this.m_workbook.Path + @"\" + Path.GetFileNameWithoutExtension(this.m_workbook.Name);
+            this.m_relativePath = @".\" + Path.GetFileNameWithoutExtension(this.m_workbook.Name);
+            this.m_in_column = 0;
+            this.m_out_column = 0;
+            this.m_max_row = 0;
+            this.m_oaCount = 0;
+            this.m_appendColumn = @"@審査記録";
+            this.m_isProvisions = false;
         }
         public bool 出願番号列の判定(string fileNumberRow = "出願番号")
         {
-            m_in_column = 0;
+            this.m_in_column = 0;
 
             for(int column = 1; column < 65535; column++)
             {
-                object obj = m_activeSheet.Cells[1, column].value;
+                object obj = this.m_activeSheet.Cells[1, column].value;
                 if (obj == null)
                 {
                     break;
@@ -73,19 +72,18 @@ namespace RefusalReasonList
                 }
                 if (obj.ToString().IndexOf(fileNumberRow)==0)
                 {
-                    m_in_column = column;
+                    this.m_in_column = column;
                     return true;
                 }
             }
-            m_in_column = 0;
-
+            this.m_in_column = 0;
             return false;
         }
         public bool 行数の取得()
         {
             for (int row = 2; row < 65535; row++)
             {
-                object obj = m_activeSheet.Cells[row, m_in_column].value;
+                object obj = this.m_activeSheet.Cells[row, this.m_in_column].value;
                 if (obj == null)
                 {
                     ;
@@ -96,48 +94,47 @@ namespace RefusalReasonList
                 }
                 else if (obj.ToString().Length > 0)
                 {
-                    m_max_row = row;
+                    this.m_max_row = row;
                 }
             }
-            if (m_max_row == 0) return false;
+            if (this.m_max_row == 0) return false;
             return true;
         }
-        public void 書込み列の取得(string appendColumn = @"@条文")
+        public void 書込み列の取得(string appendColumn = @"@審査記録")
         {
-            m_appendColumn = appendColumn;
+            this.m_appendColumn = appendColumn;
             for(int col=1; col<65535; col++)
             {
-                object obj = m_activeSheet.Cells[1, col].value;
-                if (obj == null
-                || obj.ToString() == "")
+                object obj = this.m_activeSheet.Cells[1, col].value;
+                if (obj == null || obj.ToString() == "")
                 {
                     break;
                 }
                 else if(obj.ToString().IndexOf(appendColumn)==0)
                 {
-                    Range range = m_activeSheet.Columns[col];
+                    Range range = this.m_activeSheet.Columns[col];
                     range.Delete(XlDeleteShiftDirection.xlShiftToLeft);
                     col--;
                 }
             }
             for (int column = 1; column < 65535; column++)
             {
-                object obj = m_activeSheet.Cells[1, column].value;
-                if (obj == null
-                || obj.ToString() == "")
+                object obj = this.m_activeSheet.Cells[1, column].value;
+                if (obj == null || obj.ToString() == "")
                 {
-                    m_out_column = column;
+                    this.m_out_column = column;
                     break;
                 }
             }
             return;
         }
         // 明細書のパラグラフをリストに格納
-        public bool DoGetRefusalReason()
+        public bool DoGetRefusalReason(bool isProvisions)
         {
             bool fRet = true;
+            this.m_isProvisions = isProvisions;
 
-            using (ProgressForm pd = new ProgressForm("拒絶理由通知",
+            using (ProgressForm pd = new ProgressForm("審査記録",
                     new DoWorkEventHandler(ProgressDialog_Support_DoGetRefusalReason),
                     0))
             {
@@ -181,157 +178,139 @@ namespace RefusalReasonList
             long lastTick = currentDate.Ticks-1200;
             long currTick;
 
-            Account ac = new Account();
-            AccessToken at = new AccessToken(ac.m_id, ac.m_password, ac.m_path);
-            int errCode = 0;
-
-            for (int row=2; row <= m_max_row; row++)
+            using (Account account = new Account())
             {
-                string fileNumber = convertAd(m_activeSheet.Cells[row, m_in_column].Value);
-                System.Threading.Thread.Sleep(16);
-                i++;
-                //キャンセルされたか調べる
-                if (bw.CancellationPending)
+                AccessToken accessToken = new AccessToken(account.m_id, account.m_password, account.m_path);
+                for (int row = 2; row <= this.m_max_row; row++)
                 {
-                    //キャンセルされたとき
-                    e.Cancel = true;
-                    break;
-                }
-                currentDate = DateTime.Now;
-                currTick = currentDate.Ticks;
-                if (currTick - lastTick > 600 * 10000)
-                {
-                    //指定された時間待機する
-                    System.Threading.Thread.Sleep(16);
-
-                    int percent = i * 100 / m_max_row;
-                    //bw.ReportProgress(percent, i.ToString());
-                    bw.ReportProgress(percent, fileNumber);
-                    lastTick = currTick;
-                }
-                Regex rx0 = new Regex(@"^[0-9]{10,10}$", RegexOptions.None);
-                Match w_match0 = rx0.Match(fileNumber);
-                if (w_match0.Success)
-                {
-                    at.refresh();
-                    AppDocContRefusalReason tj5 = new AppDocContRefusalReason(fileNumber, at.m_access_token.access_token);
-                    if (tj5.m_error == tj5.e_CONTENT)
+                    string fileNumber = 出願番号取得(this.m_activeSheet.Cells[row, this.m_in_column].Value);
+                    Regex rx0 = new Regex(@"^[0-9]{10,10}$", RegexOptions.None);
+                    Match w_match0 = rx0.Match(fileNumber);
+                    if (w_match0.Success == false)
                     {
-                        if(tj5.m_result.statusCode == "108")
-                        {
-                            m_activeSheet.Cells[row, m_out_column].value = @"";
-                            m_activeSheet.Cells[row, m_out_column].Formula = @"#N/A";
-                        }
-                        else
-                        if (tj5.m_result.statusCode == "203")
-                        {
-                            m_activeSheet.Cells[row, m_out_column].value = @"";
-                            m_activeSheet.Cells[row, m_out_column].Formula = @"#REF!";
-                            e.Result = 3;
-                            break;
-                        }
-                        else
-                        {
-                            m_activeSheet.Cells[row, m_out_column].value = @"";
-                            m_activeSheet.Cells[row, m_out_column].Formula = @"#REF!";
-                        }
+                        continue;
                     }
-                    else
+                    System.Threading.Thread.Sleep(16);
+                    i++;
+                    //キャンセルされたか調べる
+                    if (bw.CancellationPending)
+                    {
+                        //キャンセルされたとき
+                        e.Cancel = true;
+                        break;
+                    }
+                    currentDate = DateTime.Now;
+                    currTick = currentDate.Ticks;
+                    if (currTick - lastTick > 600 * 10000)
+                    {
+                        //指定された時間待機する
+                        System.Threading.Thread.Sleep(16);
+
+                        int percent = i * 100 / m_max_row;
+                        //bw.ReportProgress(percent, i.ToString());
+                        bw.ReportProgress(percent, fileNumber);
+                        lastTick = currTick;
+                    }
+                    m_xml2WordList = new List<Xml2Word>();
+
+                    accessToken.refresh();
+                    AppDocContRefusalReasonDecision tj5 = new AppDocContRefusalReasonDecision(fileNumber, accessToken.m_access_token.access_token);
                     if (tj5.m_error == tj5.e_NONE && tj5.m_files != null)
                     {
-                        int j = 0;
                         foreach (string f in tj5.m_files)
                         {
-                            notice_pat_exam npe = new notice_pat_exam(f);
-                            if (m_wordConvert)
+                            Xml2Word xml2word = new Xml2Word(f, fileNumber, m_outPath);
+                            if (xml2word != null)
                             {
-                                if (System.IO.Directory.Exists(m_outPath) == false)
+                                m_xml2WordList.Add(xml2word);
+                            }
+                        }
+                    }
+                    //キャンセルされたか調べる
+                    if (bw.CancellationPending)
+                    {
+                        //キャンセルされたとき
+                        e.Cancel = true;
+                        break;
+                    }
+                    currentDate = DateTime.Now;
+                    currTick = currentDate.Ticks;
+                    if (currTick - lastTick > 600 * 10000)
+                    {
+                        //指定された時間待機する
+                        System.Threading.Thread.Sleep(16);
+
+                        int percent = i * 100 / m_max_row;
+                        //bw.ReportProgress(percent, i.ToString());
+                        bw.ReportProgress(percent, fileNumber);
+                        lastTick = currTick;
+                    }
+                    accessToken.refresh();
+                    AppDocContOpinionAmendment tj2 = new AppDocContOpinionAmendment(fileNumber, accessToken.m_access_token.access_token);
+                    if (tj2.m_error == tj2.e_NONE && tj2.m_files != null)
+                    {
+                        foreach (string f in tj2.m_files)
+                        {
+                            notice_pat_exam npe = new notice_pat_exam(f);
+                            if (npe != null)
+                            {
+                                Xml2Word xml2word = new Xml2Word(f, fileNumber, this.m_outPath, 20, 15, 30, 25);
+                                m_xml2WordList.Add(xml2word);
+                            }
+                        }
+                    }
+                    m_xml2WordList.Sort((a, b) => string.Compare(a.m_Date, b.m_Date));
+                    int j = 0;
+                    foreach (Xml2Word xml2word in m_xml2WordList)
+                    {
+                        if (xml2word.m_DocumentName.Length > 0)
+                        {
+                            string szName = xml2word.m_DocumentName;
+                            if (this.m_isProvisions)
+                            {
+                                if (xml2word.m_provisions.Length > 0)
                                 {
-                                    Directory.CreateDirectory(m_outPath);
+                                    szName = xml2word.m_provisions;
                                 }
-                                Xml2Word xml2Word = new Xml2Word(f, fileNumber, m_outPath, 20, 15, 30, 25);
-                                if (npe != null)
-                                {
-                                    if (xml2Word.m_wordFilePath.Length != 0)
-                                    {
-                                        m_activeSheet.Cells[row, m_out_column + j].Formula = "";
-                                        m_activeSheet.Hyperlinks.Add(m_activeSheet.Cells[row, m_out_column + j], m_relativePath + @"\" + Path.GetFileName(xml2Word.m_wordFilePath), Type.Missing, "", npe.provisions());
-                                        j++;
-                                        /*
-                                        m_activeSheet.Cells[row, m_out_column + j].Formula = "";
-                                        m_activeSheet.Cells[row, m_out_column + j].value = npe.refusal_sentences();
-                                        j++;
-                                        m_activeSheet.Cells[row, m_out_column + j].Formula = "";
-                                        m_activeSheet.Cells[row, m_out_column + j].value = npe.xString("//jp:drafting-body");
-                                        j++;
-                                        */
-                                    } else
-                                    {
-                                        m_activeSheet.Cells[row, m_out_column + j].Formula = "";
-                                        m_activeSheet.Cells[row, m_out_column + j].value = npe.provisions();
-                                        j++;
-                                    }
-                                }
-                                else
-                                {
-                                    m_activeSheet.Cells[row, m_out_column + j].Formula = "";
-                                    m_activeSheet.Cells[row, m_out_column + j].value = "";
-                                    j++;
-                                }
+                            }
+                            if (xml2word.m_wordFilePath.Length > 0)
+                            {
+                                this.m_activeSheet.Cells[row, this.m_out_column + j].Formula = "";
+                                this.m_activeSheet.Hyperlinks.Add(this.m_activeSheet.Cells[row, this.m_out_column + j], this.m_relativePath + @"\" + Path.GetFileName(xml2word.m_outFileName), Type.Missing, "", szName);
+                                j++;
                             }
                             else
                             {
-                                if (npe != null)
-                                {
-                                    m_activeSheet.Cells[row, m_out_column + j].Formula = "";
-                                    m_activeSheet.Cells[row, m_out_column + j].value = npe.provisions();
-                                    j++;
-                                    /*
-                                    m_activeSheet.Cells[row, m_out_column + j].Formula = "";
-                                    m_activeSheet.Cells[row, m_out_column + j].value = npe.refusal_sentences();
-                                    j++;
-                                    m_activeSheet.Cells[row, m_out_column + j].Formula = "";
-                                    m_activeSheet.Cells[row, m_out_column + j].value = npe.xString("//jp:drafting-body");
-                                    j++;
-                                    */
-                                }
-                                else
-                                {
-                                    m_activeSheet.Cells[row, m_out_column + j].Formula = "";
-                                    m_activeSheet.Cells[row, m_out_column + j].value = "";
-                                    j++;
-                                }
-                            }
-                            if (m_oaCount < j)
-                            {
-                                m_oaCount = j;
-                                m_activeSheet.Cells[1, m_out_column + j-1].value = m_appendColumn + j.ToString();
+                                this.m_activeSheet.Cells[row, this.m_out_column + j].Formula = "";
+                                this.m_activeSheet.Cells[row, this.m_out_column + j].value = szName;
+                                j++;
                             }
                         }
-                    }
-                    else
-                    {
-                        m_activeSheet.Cells[row, m_out_column].value = @"";
-                        m_activeSheet.Cells[row, m_out_column].Formula = @"#REF!";
+                        else
+                        {
+                            this.m_activeSheet.Cells[row, this.m_out_column + j].Formula = "";
+                            this.m_activeSheet.Cells[row, this.m_out_column + j].value = "";
+                            j++;
+                        }
+                        if (this.m_oaCount < j)
+                        {
+                            this.m_oaCount = j;
+                            this.m_activeSheet.Cells[1, this.m_out_column + j - 1].value = this.m_appendColumn + j.ToString();
+                        }
                     }
                 }
-                else
+                for (i = 0; i < m_oaCount; i++)
                 {
-                    m_activeSheet.Cells[row, m_out_column].value = @"";
-                    m_activeSheet.Cells[row, m_out_column].Formula = @"#NAME?";
+                    this.m_activeSheet.Cells[1, this.m_out_column + i].value = this.m_appendColumn + (i + 1).ToString();
                 }
+                //結果を設定する
+                e.Result = 0;
+                accessToken.Dispose();
+                account.Dispose();
             }
-            for(i=0; i<m_oaCount; i++)
-            {
-                m_activeSheet.Cells[1, m_out_column + i].value = m_appendColumn + (i+1).ToString();
-            }
-            //結果を設定する
-            e.Result = 0;
-            at.Dispose();
-            ac.Dispose();
         }
 
-        private string convertAd(object objFileNumber)
+        private string 出願番号取得(object objFileNumber)
         {
             string fileNumber = "";
             if (objFileNumber != null)

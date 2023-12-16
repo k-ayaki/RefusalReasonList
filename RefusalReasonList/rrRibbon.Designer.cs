@@ -36,7 +36,6 @@
         {
             this.JpoApi0 = this.Factory.CreateRibbonTab();
             this.rrGroup = this.Factory.CreateRibbonGroup();
-            this.rrButton = this.Factory.CreateRibbonButton();
             this.buttonRR2Word = this.Factory.CreateRibbonButton();
             this.buttonAccount = this.Factory.CreateRibbonButton();
             this.buttonVersion = this.Factory.CreateRibbonButton();
@@ -53,26 +52,15 @@
             // 
             // rrGroup
             // 
-            this.rrGroup.Items.Add(this.rrButton);
             this.rrGroup.Items.Add(this.buttonRR2Word);
             this.rrGroup.Items.Add(this.buttonAccount);
             this.rrGroup.Items.Add(this.buttonVersion);
-            this.rrGroup.Label = "拒絶理由通知";
+            this.rrGroup.Label = "API包袋";
             this.rrGroup.Name = "rrGroup";
-            // 
-            // rrButton
-            // 
-            this.rrButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.rrButton.Label = "条文";
-            this.rrButton.Name = "rrButton";
-            this.rrButton.OfficeImageId = "GroupListActions";
-            this.rrButton.ShowImage = true;
-            this.rrButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button1_Click);
             // 
             // buttonRR2Word
             // 
-            this.buttonRR2Word.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.buttonRR2Word.Label = "拒理Word";
+            this.buttonRR2Word.Label = "包袋取得";
             this.buttonRR2Word.Name = "buttonRR2Word";
             this.buttonRR2Word.OfficeImageId = "FileSaveAsWordDocx";
             this.buttonRR2Word.ShowImage = true;
@@ -112,7 +100,6 @@
 
         internal Microsoft.Office.Tools.Ribbon.RibbonTab JpoApi0;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup rrGroup;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton rrButton;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton buttonRR2Word;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton buttonAccount;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton buttonVersion;

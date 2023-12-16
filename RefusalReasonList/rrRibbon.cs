@@ -16,38 +16,6 @@ namespace RefusalReasonList
 
         }
 
-        private void button1_Click(object sender, RibbonControlEventArgs e)
-        {
-            using (Account ac = new Account())
-            {
-                using (AccessToken at = new AccessToken(ac.m_id, ac.m_password, ac.m_path))
-                {
-                    if (at.m_access_token.access_token.Length == 0)
-                    {
-                        MessageBox.Show("アカウントが正しく設定されていません。");
-                        return;
-                    }
-                    at.Dispose();
-                }
-                ac.Dispose();
-            }
-            using (RefusalReasonList fileList = new RefusalReasonList())
-            {
-                if (fileList.出願番号列の判定("出願番号") == true)
-                {
-                    fileList.書込み列の取得(@"@条文");
-                    fileList.行数の取得();
-                    fileList.m_wordConvert = false;
-                    fileList.DoGetRefusalReason();
-                    MessageBox.Show("出願番号列あり");
-                }
-                else
-                {
-                    MessageBox.Show("出願番号列なし");
-                }
-            }
-        }
-
         private void buttonRR2Word_Click(object sender, RibbonControlEventArgs e)
         {
             using (Account ac = new Account())
@@ -70,17 +38,17 @@ namespace RefusalReasonList
                 {
                     if (rrList.出願番号列の判定("出願番号") == true)
                     {
-                        rrList.書込み列の取得(@"@条文");
+                        rrList.書込み列の取得(@"@審査記録");
                         rrList.行数の取得();
-                        rrList.m_wordConvert = true;
-                        rrList.DoGetRefusalReason();
+                        rrList.DoGetRefusalReason(true);
                         MessageBox.Show("出願番号列あり");
                     }
                     else
                     {
                         MessageBox.Show("出願番号列なし");
                     }
-                } else
+                } 
+                else
                 {
                     MessageBox.Show("ワークシートを保存してください。保存先に拒絶理由通知のWordファイルが生成されます。");
                 }
@@ -89,7 +57,10 @@ namespace RefusalReasonList
 
         private void buttonAccount_Click(object sender, RibbonControlEventArgs e)
         {
-            Globals.ThisAddIn.TaskPane.Visible = !Globals.ThisAddIn.TaskPane.Visible;
+            if (Globals.ThisAddIn.TaskPane != null)
+            {
+                Globals.ThisAddIn.TaskPane.Visible = !Globals.ThisAddIn.TaskPane.Visible;
+            }
         }
 
         private void buttonVersion_Click(object sender, RibbonControlEventArgs e)

@@ -8,6 +8,12 @@ using Office = Microsoft.Office.Core;
 using Microsoft.Office.Tools.Excel;
 using System.Reflection;
 using System.Windows.Forms;
+using DocumentFormat.OpenXml.ExtendedProperties;
+using Microsoft.Office.Interop.Excel;
+using Microsoft.Office.Tools;
+using DocumentFormat.OpenXml.Office2013.WebExtentionPane;
+using System.Diagnostics;
+using OpenXmlPowerTools;
 
 namespace RefusalReasonList
 {
@@ -21,11 +27,14 @@ namespace RefusalReasonList
 
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            //myPane = this.CustomTaskPanes.Add(new UserControlAccount(), "APIアカウント");
+            myPane = this.CustomTaskPanes.Add(new UserControlAccount(), "APIアカウント");
         }
+
+
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
         }
+
         private void taskPaneValue_VisibleChanged(object sender, System.EventArgs e)
         {
             if (this.panesDictionary.Keys.Count == 0)
@@ -79,8 +88,6 @@ namespace RefusalReasonList
                 }
             }
         }
-
-
         #region VSTO で生成されたコード
 
         /// <summary>
