@@ -210,7 +210,6 @@
       <DependentUpon>VersionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="RefusalReasonList.cs" />
-    <Compile Include="notice_pat_exam.cs" />
     <Compile Include="ProgressForm.cs">
       <SubType>Form</SubType>
     </Compile>

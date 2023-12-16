@@ -251,12 +251,8 @@ namespace RefusalReasonList
                     {
                         foreach (string f in tj2.m_files)
                         {
-                            notice_pat_exam npe = new notice_pat_exam(f);
-                            if (npe != null)
-                            {
-                                Xml2Word xml2word = new Xml2Word(f, fileNumber, this.m_outPath, 20, 15, 30, 25);
-                                m_xml2WordList.Add(xml2word);
-                            }
+                            Xml2Word xml2word = new Xml2Word(f, fileNumber, this.m_outPath, 20, 15, 30, 25);
+                            m_xml2WordList.Add(xml2word);
                         }
                     }
                     m_xml2WordList.Sort((a, b) => string.Compare(a.m_Date, b.m_Date));
