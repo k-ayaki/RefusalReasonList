@@ -177,10 +177,11 @@ namespace RefusalReasonList
             currentDate = DateTime.Now;
             long lastTick = currentDate.Ticks-1200;
             long currTick;
+            bool isAppDocContRefusalReasonDecision = true;
 
             using (Account account = new Account())
             {
-                AccessToken accessToken = new AccessToken(account.m_id, account.m_password, account.m_path);
+                AccessToken token = new AccessToken(account.m_id, account.m_password, account.m_path);
                 for (int row = 2; row <= this.m_max_row; row++)
                 {
                     string fileNumber = 出願番号取得(this.m_activeSheet.Cells[row, this.m_in_column].Value);
@@ -188,6 +189,8 @@ namespace RefusalReasonList
                     Match w_match0 = rx0.Match(fileNumber);
                     if (w_match0.Success == false)
                     {
+                        this.m_activeSheet.Cells[row, this.m_out_column].value = @"";
+                        this.m_activeSheet.Cells[row, this.m_out_column].Formula = @"#N/A";
                         continue;
                     }
                     System.Threading.Thread.Sleep(16);
@@ -211,20 +214,31 @@ namespace RefusalReasonList
                         bw.ReportProgress(percent, fileNumber);
                         lastTick = currTick;
                     }
-                    m_xml2WordList = new List<Xml2Word>();
+                    this.m_xml2WordList = new List<Xml2Word>();
 
-                    accessToken.refresh();
-                    AppDocContRefusalReasonDecision tj5 = new AppDocContRefusalReasonDecision(fileNumber, accessToken.m_access_token.access_token);
-                    if (tj5.m_error == tj5.e_NONE && tj5.m_files != null)
+                    token.refresh();
+                    if (token.m_access_token.access_token.Length == 0)
                     {
-                        foreach (string f in tj5.m_files)
+                        MessageBox.Show("アカウントが正しく入力されていません。");
+                        break;
+                    }
+                    AppDocContRefusalReasonDecision tj1 = new AppDocContRefusalReasonDecision(fileNumber, token.m_access_token.access_token);
+                    if (tj1.m_error == tj1.e_NONE && tj1.m_files != null)
+                    {
+                        foreach (string f in tj1.m_files)
                         {
-                            Xml2Word xml2word = new Xml2Word(f, fileNumber, m_outPath);
+                            Xml2Word xml2word = new Xml2Word(f, fileNumber, this.m_outPath);
                             if (xml2word != null)
                             {
                                 m_xml2WordList.Add(xml2word);
                             }
                         }
+                    }
+                    else
+                    if (tj1.m_error == tj1.e_SERVER || tj1.m_error == tj1.e_NETWORK)
+                    {
+                        MessageBox.Show(tj1.m_result.errorMessage);
+                        break;
                     }
                     //キャンセルされたか調べる
                     if (bw.CancellationPending)
@@ -245,19 +259,33 @@ namespace RefusalReasonList
                         bw.ReportProgress(percent, fileNumber);
                         lastTick = currTick;
                     }
-                    accessToken.refresh();
-                    AppDocContOpinionAmendment tj2 = new AppDocContOpinionAmendment(fileNumber, accessToken.m_access_token.access_token);
+                    token.refresh();
+                    if (token.m_access_token.access_token.Length == 0)
+                    {
+                        MessageBox.Show("アカウントが正しく入力されていません。");
+                        break;
+                    }
+                    AppDocContOpinionAmendment tj2 = new AppDocContOpinionAmendment(fileNumber, token.m_access_token.access_token);
                     if (tj2.m_error == tj2.e_NONE && tj2.m_files != null)
                     {
                         foreach (string f in tj2.m_files)
                         {
-                            Xml2Word xml2word = new Xml2Word(f, fileNumber, this.m_outPath, 20, 15, 30, 25);
-                            m_xml2WordList.Add(xml2word);
+                            Xml2Word xml2word = new Xml2Word(f, fileNumber, this.m_outPath);
+                            if (xml2word != null)
+                            {
+                                this.m_xml2WordList.Add(xml2word);
+                            }
                         }
                     }
-                    m_xml2WordList.Sort((a, b) => string.Compare(a.m_Date, b.m_Date));
+                    else
+                    if (tj2.m_error == tj2.e_SERVER || tj2.m_error == tj2.e_NETWORK)
+                    {
+                        MessageBox.Show(tj2.m_result.errorMessage);
+                        break;
+                    }
+                    this.m_xml2WordList.Sort((a, b) => string.Compare(a.m_Date, b.m_Date));
                     int j = 0;
-                    foreach (Xml2Word xml2word in m_xml2WordList)
+                    foreach (Xml2Word xml2word in this.m_xml2WordList)
                     {
                         if (xml2word.m_DocumentName.Length > 0)
                         {
@@ -277,15 +305,15 @@ namespace RefusalReasonList
                             }
                             else
                             {
-                                this.m_activeSheet.Cells[row, this.m_out_column + j].Formula = "";
                                 this.m_activeSheet.Cells[row, this.m_out_column + j].value = szName;
+                                this.m_activeSheet.Cells[row, this.m_out_column + j].Formula = "";
                                 j++;
                             }
                         }
                         else
                         {
-                            this.m_activeSheet.Cells[row, this.m_out_column + j].Formula = "";
                             this.m_activeSheet.Cells[row, this.m_out_column + j].value = "";
+                            this.m_activeSheet.Cells[row, this.m_out_column + j].Formula = @"#NULL!";
                             j++;
                         }
                         if (this.m_oaCount < j)
@@ -295,13 +323,13 @@ namespace RefusalReasonList
                         }
                     }
                 }
-                for (i = 0; i < m_oaCount; i++)
+                for (i = 0; i < this.m_oaCount; i++)
                 {
                     this.m_activeSheet.Cells[1, this.m_out_column + i].value = this.m_appendColumn + (i + 1).ToString();
                 }
                 //結果を設定する
                 e.Result = 0;
-                accessToken.Dispose();
+                token.Dispose();
                 account.Dispose();
             }
         }
